@@ -117,7 +117,7 @@ async function run() {
       const data = req.body
 
       const result = await layerCollection.updateOne({
-        _id: data.id
+        _id:new ObjectId(data.id) 
       },
       {
         $set:{
