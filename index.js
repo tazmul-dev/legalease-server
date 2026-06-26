@@ -26,6 +26,7 @@ async function run() {
 
     const database = client.db('lawHire')
     const layerCollection = database.collection("layers")
+    const lawyerRequestCollection = database.collection("lawyerRequest")
      
    
     // layer porfile releted ;
@@ -42,7 +43,7 @@ async function run() {
     
     app.get('/maneg/profile/:id',async(req, res)=>{
       
-      const cursor = await layerCollection.find({userId:req.params.id})
+      const cursor = await layerCollection.find({lawyerId:req.params.id})
       const result = await cursor.toArray()
 
       res.send(result)
@@ -65,7 +66,23 @@ async function run() {
       const result = await cursor.toArray()
       res.send(result)
     })
+
+    // lawyer details related
+    app.get('/lawyer/details/:id',async(req, res)=>{
+      const id = req.params.id
+      const filter = {
+      _id: new ObjectId(id)
+      }
+      const result = await layerCollection.findOne(filter)
+      res.send(result)
+    })
     
+    app.post('/lawyer/request',async(req, res)=>{
+      const request = req.body
+      const result = await lawyerRequestCollection.insertOne(request)
+      res.send(result)
+
+    })
 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
