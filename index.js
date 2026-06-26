@@ -112,6 +112,30 @@ async function run() {
       res.send(result)
     })
 
+    app.patch('/edit/service',async(req, res)=>{
+      
+      const data = req.body
+
+      const result = await layerCollection.updateOne({
+        _id: data.id
+      },
+      {
+        $set:{
+          image:data.image,
+          name: data.name,
+          consultationFee:data.fee,
+          category: data.category,
+          summary: data.summary
+
+        }
+      }
+    )
+      
+
+   res.send(result)
+    })
+     
+
     //user relate route:
     
     app.get('/myRequest/:id',async(req, res)=>{
