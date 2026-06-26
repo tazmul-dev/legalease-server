@@ -27,6 +27,7 @@ async function run() {
     const database = client.db('lawHire')
     const layerCollection = database.collection("layers")
     const lawyerRequestCollection = database.collection("lawyerRequest")
+    const userCollection = database.collection('user')
      
    
     // layer porfile releted ;
@@ -112,7 +113,40 @@ async function run() {
       res.send(result)
     })
 
-    app.patch('/edit/service',async(req, res)=>{
+    app.patch('/update/profile',async(req, res)=>{
+      
+      const data = req.body
+
+      const result = await userCollection.updateOne({
+        _id:new ObjectId(data.id) 
+      },
+      {
+        $set:{
+          image:data.image,
+          name: data.name,
+          
+
+        }
+      }
+    )
+      
+
+   res.send(result)
+    })
+     
+
+    //user relate route:
+    
+    app.get('/myRequest/:id',async(req, res)=>{
+
+      const cursor = await lawyerRequestCollection.find({userId:req.params.id})
+      const result = await cursor.toArray()
+
+      res.send(result)
+
+    })
+
+     app.patch('/edit/service',async(req, res)=>{
       
       const data = req.body
 
@@ -135,17 +169,6 @@ async function run() {
    res.send(result)
     })
      
-
-    //user relate route:
-    
-    app.get('/myRequest/:id',async(req, res)=>{
-
-      const cursor = await lawyerRequestCollection.find({userId:req.params.id})
-      const result = await cursor.toArray()
-
-      res.send(result)
-
-    })
 
 
     //brows lawyer related
