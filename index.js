@@ -2,7 +2,7 @@ const express = require('express');
 const app = express()
 const cors = require('cors')
 const env = require('dotenv').config()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = 5000
 app.use(cors())
 app.use(express.json())
@@ -39,10 +39,33 @@ async function run() {
       res.send(result)
     }
     })
-    app.get('/magege/profile',async(req,res)=>{
+    
+    app.get('/maneg/profile/:id',async(req, res)=>{
       
+      const cursor = await layerCollection.find({userId:req.params.id})
+      const result = await cursor.toArray()
+
+      res.send(result)
     })
 
+    app.delete("/maneg/profile/:id", async(req, res)=>{
+      const id = req.params.id
+      const query = {
+        _id: new ObjectId(id)
+      }
+      const result = await layerCollection.deleteOne(query)
+      res.send(result)
+    })
+
+
+    //brows lawyer related
+   
+    app.get('/lawyers',async(req, res)=>{
+      const cursor =await layerCollection.find();
+      const result = await cursor.toArray()
+      res.send(result)
+    })
+    
 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
