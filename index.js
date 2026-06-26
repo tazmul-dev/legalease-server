@@ -58,11 +58,99 @@ async function run() {
       res.send(result)
     })
 
+     app.patch('/requestReject/:id',async(req, res)=>{
+      const rejectId = req.params.id
+      console.log(rejectId)
+
+        const request = await lawyerRequestCollection.findOne({
+      _id: new ObjectId(rejectId),
+
+    })
+    await lawyerRequestCollection.updateOne({
+      _id: new ObjectId(rejectId)
+     },
+    {
+      $set:{
+        status:'rejected'
+      }
+    }
+    );
+    res.send({
+      success:true,
+       message: "Request approved successfully",
+    })
+
+    })
+     app.patch('/requestAccept/:id',async(req, res)=>{
+      const rejectId = req.params.id
+      console.log(rejectId)
+
+        const request = await lawyerRequestCollection.findOne({
+      _id: new ObjectId(rejectId),
+
+    })
+    await lawyerRequestCollection.updateOne({
+      _id: new ObjectId(rejectId)
+     },
+    {
+      $set:{
+        status:'Accepted'
+      }
+    }
+    );
+    res.send({
+      success:true,
+       message: "Request approved successfully",
+    })
+    })
+
+    app.get('/api/request/:id',async(req, res)=>{
+      
+      const cursor = await lawyerRequestCollection.find({lawyerUserId:req.params.id})
+      const result = await cursor.toArray()
+
+      res.send(result)
+    })
+
+    //user relate route:
+    
+    app.get('/myRequest/:id',async(req, res)=>{
+
+      const cursor = await lawyerRequestCollection.find({userId:req.params.id})
+      const result = await cursor.toArray()
+
+      res.send(result)
+
+    })
+
 
     //brows lawyer related
    
     app.get('/lawyers',async(req, res)=>{
-      const cursor =await layerCollection.find();
+      console.log('q', req.query)
+      const query = {}
+       if (req.query.search) {
+        query.$or = [
+            { name: { $regex: req.query.search, $options: 'i' } },
+            
+        ]
+    }
+      if(req.query.category){
+        query.category = req.query.category
+      }
+      if(req.query.status){
+        query.status = req.query.status
+      }
+      // pagnation related work
+      if(req.query.page){
+        const page = req.query.page;
+        const perPage = req.query.perPage || 10
+        const skipItems = (page-1)*perPage
+        const cursor =await layerCollection.find(query).skip(skipItems).limit(perPage);
+      const lawyer = await cursor.toArray()
+      return res.send(lawyer)
+      }
+      const cursor =await layerCollection.find(query);
       const result = await cursor.toArray()
       res.send(result)
     })
