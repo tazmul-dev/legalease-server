@@ -3,10 +3,17 @@ const app = express()
 const cors = require('cors')
 const env = require('dotenv').config()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+
+
+
 const port = 5000
 app.use(cors())
 app.use(express.json())
 
+ const veryfityTokan = async (req, res, next)=>{
+    console.log('headers',req.headers)
+  next()
+ }
 
 const uri = process.env.MONGODB_URL
 
@@ -59,9 +66,9 @@ async function run() {
       res.send(result)
     })
 
-     app.patch('/requestReject/:id',async(req, res)=>{
+     app.patch('/requestReject/:id', async(req, res)=>{
       const rejectId = req.params.id
-      console.log(rejectId)
+      // console.log(rejectId)
 
         const request = await lawyerRequestCollection.findOne({
       _id: new ObjectId(rejectId),
@@ -82,9 +89,9 @@ async function run() {
     })
 
     })
-     app.patch('/requestAccept/:id',async(req, res)=>{
+     app.patch('/requestAccept/:id',veryfityTokan, async(req, res)=>{
       const rejectId = req.params.id
-      console.log(rejectId)
+      // console.log(rejectId)
 
         const request = await lawyerRequestCollection.findOne({
       _id: new ObjectId(rejectId),
@@ -113,7 +120,7 @@ async function run() {
       res.send(result)
     })
 
-    app.patch('/update/profile',async(req, res)=>{
+    app.patch('/update/profile' , async(req, res)=>{
       
       const data = req.body
 
@@ -146,7 +153,7 @@ async function run() {
 
     })
 
-     app.patch('/edit/service',async(req, res)=>{
+     app.patch('/edit/service', async(req, res)=>{
       
       const data = req.body
 
@@ -181,7 +188,7 @@ async function run() {
             { name: { $regex: req.query.search, $options: 'i' } },
             
         ]
-    }
+     }
       if(req.query.category){
         query.category = req.query.category
       }
