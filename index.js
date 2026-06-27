@@ -43,7 +43,7 @@ const veryfityTokan = async (req, res, next)=>{
 
   try{
     const {payload} = await jwtVerify(token, JWKS)
-    console.log(payload,"payload")
+    req.user = payload
      next()
   }catch(error){
     console.log(error)
@@ -51,6 +51,10 @@ const veryfityTokan = async (req, res, next)=>{
   }
 
  
+ }
+
+ const userVerify = async(req, res, next)=>{
+  
  }
 
 async function run() {
