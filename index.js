@@ -3,6 +3,7 @@ const app = express()
 const cors = require('cors')
 const env = require('dotenv').config()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { createRemoteJWKSet, jwtVerify } = require('jose-cjs');
 
 
 
@@ -10,10 +11,7 @@ const port = 5000
 app.use(cors())
 app.use(express.json())
 
- const veryfityTokan = async (req, res, next)=>{
-    console.log('headers',req.headers)
-  next()
- }
+ 
 
 const uri = process.env.MONGODB_URL
 
@@ -25,6 +23,35 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
+ 
+const JWKS = createRemoteJWKSet(new URL("http://localhost:3000/api/auth/jwks"))
+
+const veryfityTokan = async (req, res, next)=>{
+  const authHeader = req.headers.authorization;
+  console.log(authHeader,"authHeader")
+
+  if(!authHeader || !authHeader.startsWith('Bearer')){
+    return res.status(401).json({message:'unAuthorized'})
+  }
+
+  const token = authHeader.split(" ")[1]
+
+  if(!token){
+    return res.status(401).json({message:'unAuthorized'})
+
+  }
+
+  try{
+    const {payload} = await jwtVerify(token, JWKS)
+    console.log(payload,"payload")
+     next()
+  }catch(error){
+    console.log(error)
+     return res.status(401).json({message:'unAuthorized'})
+  }
+
+ 
+ }
 
 async function run() {
   try {
@@ -39,7 +66,7 @@ async function run() {
    
     // layer porfile releted ;
 
-    app.post('/service',async(req, res)=>{
+    app.post('/service',veryfityTokan,async(req, res)=>{
       {
 
       const layer = req.body;
@@ -89,7 +116,7 @@ async function run() {
     })
 
     })
-     app.patch('/requestAccept/:id',veryfityTokan, async(req, res)=>{
+     app.patch('/requestAccept/:id', async(req, res)=>{
       const rejectId = req.params.id
       // console.log(rejectId)
 
@@ -224,6 +251,12 @@ async function run() {
       const result = await lawyerRequestCollection.insertOne(request)
       res.send(result)
 
+    })
+    //admin related
+    app.get('/users',async(req, res) =>{
+
+      const result = await userCollection.find().toArray()
+      res.send(result)
     })
 
     await client.db("admin").command({ ping: 1 });
