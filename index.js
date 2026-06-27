@@ -258,6 +258,50 @@ async function run() {
       const result = await userCollection.find().toArray()
       res.send(result)
     })
+       app.patch('/user/role/change/:id', async(req, res)=>{
+      
+        const id =req.params.id
+
+      const result = await userCollection.updateOne({
+        _id:new ObjectId(id) 
+      },
+      {
+        $set:{
+         
+          role: 'admin'
+
+        }
+      }
+    )
+      
+
+   res.send(result)
+    })
+
+     app.delete("/user/delete/:id", async(req, res)=>{
+      const id = req.params.id
+      const query = {
+        _id: new ObjectId(id)
+      }
+      const result = await userCollection.deleteOne(query)
+      res.send(result)
+    })
+
+    //home page releted
+
+    app.get("/featured-lawyers", async (req, res) => {
+  const result = await layerCollection .aggregate([
+      {
+        $sample: {
+          size: 6,
+        },
+      },
+    ])
+    .toArray();
+
+  res.send(result);
+});
+
 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
